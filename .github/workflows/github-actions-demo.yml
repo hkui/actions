@@ -1,6 +1,8 @@
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions
 on: [push]
+permissions:
+  contents: write
 jobs:
   study-actions:
     runs-on: ubuntu-latest
@@ -14,10 +16,19 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "This job's status is ${{ job.status }}."
-      - run: php -v
-      - run: php -m
+      - run: |
+            php -v
+            php -m
+      - name: 生成文件
+        run: php -r " file_put_contents('1.txt',date('Y-m-d H:i:s'));"
+      - name: 部署
+        uses: JamesIves/github-pages-deploy-action@v4
+        with: 
+          branch: gh-pages
+          folder: .
   job2:
     runs-on: windows-latest
     steps:
       - run: node --version
+
 
