@@ -1,11 +1,11 @@
 name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: ${{ github.actor }} is testing out GitHub Actions
 on: [push]
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
-      - run: "github.event_name:${{ github.event_name }},runner.os:${{ runner.os }},${{ github.ref }},${{ github.repository }}"
+      - run: echo "github.event_name:${{ github.event_name }},runner.os:${{ runner.os }},${{ github.ref }},${{ github.repository }}"
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
