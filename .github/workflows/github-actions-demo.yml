@@ -5,13 +5,13 @@ jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
-      - run: github.event_name:${{ github.event_name }},runner.os:${{ runner.os }},${{ github.ref }},${{ github.repository }}"
+      - run: "github.event_name:${{ github.event_name }},runner.os:${{ runner.os }},${{ github.ref }},${{ github.repository }}"
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+      - run: echo "This job's status is ${{ job.status }}."
       - run: php -v
       - run: php -m
