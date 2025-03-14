@@ -18,8 +18,8 @@ jobs:
           ls -al vendor
       - name: 压缩打包
       - run: |
-        zip -r vendor.zip vendor
-        ls -al
+          zip -r vendor.zip vendor
+          ls -al
       - name: 生成到指定分支
         uses: JamesIves/github-pages-deploy-action@v4
         with: 
