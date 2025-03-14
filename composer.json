@@ -1,0 +1,24 @@
+{
+    "name": "root/actions",
+    "description": "test",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+    	"geoip/geoip" :"1.16",
+        "ipip/datx" : "dev-master",
+        "overtrue/wechat" : "4.1.22",
+        "alibabacloud/sdk": "^1.7",
+        "aliyuncs/oss-sdk-php": "^2.4",
+        "itbdw/ip-database": "^2.0",
+        "sensorsdata/sa-sdk-php": "v1.10.5",
+        "zhuzhichao/ip-location-zh": "^2.4",
+        "predis/predis": "^1.1",
+        "mpdf/mpdf": "^8.1",
+        "jaeger/querylist": "^4.2"
+    },
+    "config": {
+        "allow-plugins": {
+            "easywechat-composer/easywechat-composer": true
+        }
+    }
+}
