@@ -18,7 +18,8 @@ jobs:
       - run: echo "This job's status is ${{ job.status }}."
       - name: echo "composer update -vvv"
       - run: |
-            composer update -vvv
+          composer update -vvv
+          ls -al
       - name: 生成到指定分支
         uses: JamesIves/github-pages-deploy-action@v4
         with: 
