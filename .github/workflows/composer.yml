@@ -17,6 +17,7 @@ jobs:
       - run: |
           composer update -vvv
           ls -al
+          ls -al vendor
       - name: 生成到指定分支
         uses: JamesIves/github-pages-deploy-action@v4
         with: 
