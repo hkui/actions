@@ -7,8 +7,6 @@ jobs:
   study-actions:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "github.event_name:${{ github.event_name }},runner.os:${{ runner.os }},${{ github.ref }},${{ github.repository }}"
-      - run: echo `pwd` `hostname`
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
@@ -18,6 +16,10 @@ jobs:
           composer update -vvv
           ls -al
           ls -al vendor
+      - name: 压缩打包
+      - run: |
+        zip -r vendor.zip vendor
+        ls -al
       - name: 生成到指定分支
         uses: JamesIves/github-pages-deploy-action@v4
         with: 
