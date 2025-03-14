@@ -1,0 +1,17 @@
+name: php-version
+run-name: php-version-test
+on: [push]
+
+jobs:
+  study-actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP with PECL extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: imagick, swoole
+      - run: |
+          php -v
+          php -m
+
