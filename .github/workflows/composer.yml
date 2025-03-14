@@ -16,7 +16,7 @@ jobs:
           composer update -vvv
           ls -al
           ls -al vendor
-      - name: 压缩打包
+      - run : echo "压缩打包"
       - run: |
           zip -r vendor.zip vendor
           ls -al
