@@ -20,7 +20,7 @@ jobs:
             php -v
             php -m
       - name: 生成文件
-        run: php -r " file_put_contents('1.txt',date('Y-m-d H:i:s'));"
+        run: php -r " file_put_contents('1.txt',date('Y-m-d H:i:s').PHP_EOL,8);"
       - name: 部署
         uses: JamesIves/github-pages-deploy-action@v4
         with: 
