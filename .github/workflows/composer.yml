@@ -1,0 +1,34 @@
+name: composer
+run-name: ${{ github.actor }}  composer update
+on: [push]
+permissions:
+  contents: write
+jobs:
+  study-actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
+      - name: Setup PHP with PECL extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.1'
+      - run: composer config --no-plugins allow-plugins.easywechat-composer/easywechat-composer true
+      - run: echo "composer update -vvv"
+      - run: |
+          php -v
+          composer update -vvv
+          ls -al
+          ls -al vendor
+      - run : echo "压缩打包"
+      - run: |
+          zip -r vendor.zip vendor
+          ls -al
+      - name: 生成到指定分支
+        uses: JamesIves/github-pages-deploy-action@v4
+        with: 
+          branch: composer
+          folder: .
+
+
