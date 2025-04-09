@@ -9,6 +9,7 @@
         }
     },
     "require": {
-        "qcloud/vod-sdk-v5": "v2.4.4"
+        "qcloud/vod-sdk-v5": "v2.4.4",
+         "firebase/php-jwt": "^6.4"
     }
 }
