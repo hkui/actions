@@ -1,22 +1,130 @@
-name: Get Xdebug for PHP 7.1.9
+name: Build Xdebug for PHP 7.1.9
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  download:
+  build-xdebug:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Download pre-compiled Xdebug
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup build environment
       run: |
-        # 下载适用于 PHP 7.1 的 Xdebug 2.9.8
-        wget https://xdebug.org/files/xdebug-2.9.8.tgz
-        tar -xzf xdebug-2.9.8.tgz
-        cd xdebug-2.9.8
-        
-    - name: Upload xdebug.so
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          autoconf \
+          automake \
+          libtool \
+          re2c \
+          bison \
+          libxml2-dev \
+          libsqlite3-dev \
+          libssl-dev \
+          libcurl4-openssl-dev \
+          libonig-dev \
+          libreadline-dev \
+          libzip-dev \
+          pkg-config \
+          wget \
+          git
+
+    - name: Download PHP 7.1.9 source
+      run: |
+        wget https://www.php.net/distributions/php-7.1.9.tar.gz -O php-7.1.9.tar.gz
+        tar -xzf php-7.1.9.tar.gz
+        rm php-7.1.9.tar.gz
+
+    - name: Compile PHP 7.1.9
+      run: |
+        cd php-7.1.9
+        ./configure \
+          --prefix=/usr/local/php-7.1.9 \
+          --with-config-file-path=/usr/local/php-7.1.9/etc \
+          --enable-mbstring \
+          --enable-zip \
+          --enable-bcmath \
+          --enable-pcntl \
+          --enable-ftp \
+          --enable-exif \
+          --enable-calendar \
+          --enable-sockets \
+          --with-openssl \
+          --with-curl \
+          --with-zlib \
+          --with-pear \
+          --with-readline \
+          --with-mysqli \
+          --with-pdo-mysql \
+          --with-libxml \
+          --enable-fpm \
+          --with-fpm-user=www-data \
+          --with-fpm-group=www-data
+        make -j$(nproc)
+        sudo make install
+
+    - name: Clone Xdebug 2.9.8
+      run: |
+        git clone https://github.com/xdebug/xdebug.git
+        cd xdebug
+        # 切换到兼容 PHP 7.1 的 2.9.8 版本
+        git checkout 2.9.8
+
+    - name: Compile Xdebug extension
+      run: |
+        cd xdebug
+        /usr/local/php-7.1.9/bin/phpize
+        ./configure --with-php-config=/usr/local/php-7.1.9/bin/php-config
+        make -j$(nproc)
+
+    - name: Test Xdebug compilation
+      run: |
+        /usr/local/php-7.1.9/bin/php --version
+        ls -la xdebug/modules/xdebug.so
+        /usr/local/php-7.1.9/bin/php -m | grep xdebug || true
+
+    - name: Upload xdebug.so as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: xdebug-2.9.8-source
-        path: xdebug-2.9.8/
+        name: xdebug-php7.1.9
+        path: xdebug/modules/xdebug.so
+        retention-days: 7
+
+    # 可选：创建一个包含安装说明的 README
+    - name: Create README file
+      run: |
+        cat > INSTALL.md << 'EOF'
+        # Xdebug for PHP 7.1.9 Installation
+
+        已成功编译 xdebug.so！
+
+        使用方法：
+
+        1. 将 xdebug.so 复制到 PHP 扩展目录
+        2. 在 php.ini 中添加：
+           ```
+           zend_extension=/path/to/xdebug.so
+           xdebug.mode=debug
+           xdebug.client_host=127.0.0.1
+           xdebug.client_port=9000
+           xdebug.start_with_request=yes
+           ```
+
+        编译信息：
+        - PHP 版本: 7.1.9
+        - Xdebug 版本: 2.9.8
+        - 编译平台: Ubuntu Linux
+        - 编译日期: $(date)
+        EOF
+      shell: bash
+
+    - name: Upload install guide
+      uses: actions/upload-artifact@v4
+      with:
+        name: installation-guide
+        path: INSTALL.md
