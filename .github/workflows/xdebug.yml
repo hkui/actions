@@ -1,42 +1,22 @@
-name: Build Xdebug for PHP 7.1.9
+name: Get Xdebug for PHP 7.1.9
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch: # 允许手动触发
+  workflow_dispatch:
 
 jobs:
-  build:
+  download:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout repository code
-      uses: actions/checkout@v4
-
-    - name: Setup PHP 7.1.9
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.1.9'
-        extensions: 
-        - curl-dev
-        - libxml2-dev
-
-    - name: Clone Xdebug (compatible version)
+    - name: Download pre-compiled Xdebug
       run: |
-        git clone https://github.com/xdebug/xdebug.git
-        cd xdebug
-        # 切换到与 PHP 7.1 兼容的 2.x 分支
-        git checkout xdebug_2_9
-
-    - name: Compile Xdebug
-      run: |
-        cd xdebug
-        phpize
-        ./configure --enable-xdebug
-        make
-
-    - name: Upload the compiled xdebug.so
+        # 下载适用于 PHP 7.1 的 Xdebug 2.9.8
+        wget https://xdebug.org/files/xdebug-2.9.8.tgz
+        tar -xzf xdebug-2.9.8.tgz
+        cd xdebug-2.9.8
+        
+    - name: Upload xdebug.so
       uses: actions/upload-artifact@v4
       with:
-        name: xdebug-php7.1.9
-        path: xdebug/modules/xdebug.so
+        name: xdebug-2.9.8-source
+        path: xdebug-2.9.8/
