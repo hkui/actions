@@ -1,87 +1,46 @@
-# 工作流名称
-name: Build Xdebug for PHP 7.1.9 (Linux x86_64)
+name: Build Xdebug (Stable)
 
-# 触发条件：手动触发（推荐，避免无用运行）
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
 
-# 运行环境
 jobs:
   build:
-    # 选择 Ubuntu 最新版（x86_64 架构）
-    runs-on: ubuntu-latest
-
-    # 步骤
+    runs-on: ubuntu-22.04  # 使用稳定版本的 Ubuntu
+    
     steps:
-      # 步骤1：检出仓库代码（无需实际代码，仅为满足 Action 规范）
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Install PHP 7.1 from deadsnakes PPA
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y software-properties-common
+        sudo add-apt-repository ppa:ondrej/php -y
+        sudo apt-get update
+        sudo apt-get install -y php7.1 php7.1-dev php7.1-cli
 
-      # 步骤2：安装编译依赖工具
-      - name: Install build dependencies
-        run: |
-          sudo apt update && sudo apt install -y \
-            gcc \
-            g++ \
-            make \
-            autoconf \
-            libtool \
-            pkg-config \
-            libxml2-dev \
-            libssl-dev \
-            libcurl4-openssl-dev \
-            libjpeg-dev \
-            libpng-dev \
-            libfreetype6-dev \
-            libzip-dev \
-            zlib1g-dev
-
-      # 步骤3：源码编译安装 PHP 7.1.9
-      - name: Compile and install PHP 7.1.9
-        run: |
-          # 下载 PHP 7.1.9 源码包
-          wget https://www.php.net/distributions/php-7.1.9.tar.gz
-          tar -zxf php-7.1.9.tar.gz
-          cd php-7.1.9
-
-          # 配置编译参数（启用必要扩展，仅满足 Xdebug 编译依赖）
-          ./configure \
-            --prefix=/usr/local/php719 \
-            --enable-fpm \
-            --enable-cli \
-            --with-openssl \
-            --with-zlib \
-            --with-libxml-dir
-
-          # 编译并安装（-j 启用多线程加速编译）
-          make -j$(nproc)
-          sudo make install
-
-          # 配置环境变量，让系统识别 php719 的命令
-          echo "/usr/local/php719/bin" >> $GITHUB_PATH
-          php -v # 验证 PHP 版本是否为 7.1.9
-
-      # 步骤4：下载 Xdebug 2.9.8 源码并编译
-      - name: Compile Xdebug 2.9.8 for PHP 7.1.9
-        run: |
-          # 下载 Xdebug 2.9.8 源码包
-          wget https://xdebug.org/files/xdebug-2.9.8.tgz
-          tar -zxf xdebug-2.9.8.tgz
-          cd xdebug-2.9.8
-
-          # 扩展编译三步曲：phpize -> configure -> make
-          /usr/local/php719/bin/phpize # 必须使用 PHP 7.1.9 对应的 phpize
-          ./configure --with-php-config=/usr/local/php719/bin/php-config # 关联对应 PHP 的 php-config
-          make -j$(nproc)
-
-          # 验证编译结果（生成 xdebug.so 在 modules 目录下）
+    - name: Download and compile Xdebug
+      run: |
+        # 直接下载 Xdebug 2.9.8 源码
+        wget -q https://xdebug.org/files/xdebug-2.9.8.tgz
+        tar -xzf xdebug-2.9.8.tgz
+        cd xdebug-2.9.8
+        
+        # 编译
+        phpize
+        ./configure
+        make
+        
+        # 验证编译成功
+        if [ -f modules/xdebug.so ]; then
+          echo "✅ xdebug.so 编译成功"
           ls -lh modules/xdebug.so
-          file modules/xdebug.so # 查看文件架构，确认是 x86_64 Linux 格式
+        else
+          echo "❌ 编译失败"
+          exit 1
+        fi
 
-      # 步骤5：上传编译产物（xdebug.so）作为 Artifact，方便下载
-      - name: Upload xdebug.so artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: xdebug-2.9.8-php7.1.9-linux-x86_64
-          path: xdebug-2.9.8/modules/xdebug.so
-          retention-days: 30 # 产物保留 30 天，可按需调整
+    - name: Upload xdebug.so
+      uses: actions/upload-artifact@v4
+      with:
+        name: xdebug-2.9.8-php7.1
+        path: xdebug-2.9.8/modules/xdebug.so
